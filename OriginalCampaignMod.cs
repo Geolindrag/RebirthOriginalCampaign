@@ -40,7 +40,8 @@ public class OriginalCampaignMod : TanksMod {
 
     static Campaign? _campaign;
     static int _runSeed;
-    static readonly HashSet<int> _rolled = [];
+    // mission id to layout chosen
+    static readonly Dictionary<int, int> _rolled = [];
     public static void Reset() {
         _campaign = null;
         _rolled.Clear();
@@ -61,16 +62,16 @@ public class OriginalCampaignMod : TanksMod {
 
         if (CampaignGlobals.InMission) return;
         int id = camp.CurrentMissionId;
-        if (id < 0 || id >= camp.CachedMissions.Length || id >= GameParam.MissionCount || _rolled.Contains(id)) return;
+        if (id < 0 || id >= camp.CachedMissions.Length || id >= GameParam.MissionCount || _rolled.ContainsKey(id)) return;
 
         bool twoPlayer = PlayerCount() >= 2;
-        var roll = RngMission.Create(_runSeed, id + 1, twoPlayer);
+        var roll = RngMission.Create(_runSeed, id + 1, twoPlayer, _rolled.TryGetValue(id - 1, out var previousMap) ? previousMap : null);
 
         // original doesnt grant bonus lives in 2p but we do :)
         bool life = !twoPlayer && OriginalData.Param.Missions[id].AwardP1;
         camp.CachedMissions[id] = MissionBuilder.Build(roll, life);
         camp.LoadMission(id);
-        _rolled.Add(id);
+        _rolled[id] = roll.Map;
     }
 
     static int PlayerCount() {

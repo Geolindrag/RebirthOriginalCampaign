@@ -44,7 +44,7 @@ public static class MissionBuilder {
             }
         }
 
-        // players 3 and 4 take free spots next to the ones the map gives. NOT making my own spots cuz fuk dat
+        // players 1 and 2 keep the map's spots, 3 spawns next to 1 and 4 next to 2
         Point Place(Point near) {
             var cell = FreeNear(near, taken);
             taken.Add(cell);
@@ -55,14 +55,16 @@ public static class MissionBuilder {
         players[3] = Place(players[1]);
 
         var tanks = new List<TankTemplate>();
-        for (int i = 0; i < PLAYER_SLOTS; i++)
+        for (int i = 0; i < PLAYER_SLOTS; i++) {
+            var spot = players[rngMission.PlayerSpawns[i]];   // the spawn points are shuffled between the players
             tanks.Add(new TankTemplate { 
                 IsPlayer = true, 
                 PlayerType = i, 
-                Position = players[i], 
-                Facing = FacingFor(players[i]), 
+                Position = spot, 
+                Facing = FacingFor(spot), 
                 Team = PLAYER_TEAM 
             });
+        }
 
         for (int slot = 0; slot < enemySpawns.Length; slot++) {
             int id = rngMission.Tanks[slot];
